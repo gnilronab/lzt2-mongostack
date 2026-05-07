@@ -9,3 +9,6 @@
 
 # Local scratch/logs
 *.log
+
+# Local Mongo prod backups
+mongprodbackup/*
