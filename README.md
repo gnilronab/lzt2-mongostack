@@ -8,6 +8,15 @@ The stack starts a single-node MongoDB 8.x replica set named `rs0` using `bitnam
 
 Note for this Omarchy host: the official MongoDB 8 images are not stable on Linux kernel 6.19 here. `mongo:8.0`/`mongo:8.3` refuse to start with MongoDB `SERVER-121912`; `mongo:8.2` starts but `mongod` exits with code 139 after ~30-60 seconds. The Debian-based Bitnami legacy MongoDB 8.0 image was verified to stay up on this host.
 
+Apple Silicon note: `bitnamilegacy/mongodb:8.0` currently publishes a `linux/amd64` image. The compose file sets `platform: ${MONGO_PLATFORM:-linux/amd64}` for MongoDB so it can run on an M1/M2/M3 Mac through Docker Desktop's amd64 emulation while still running natively on amd64 Linux hosts like Omarchy. If you need to override it, set `MONGO_PLATFORM` before running compose.
+
+If you previously ran this stack with the official `mongo` image, recreate the Mongo volume before switching back to Bitnami because the dbpath/layout differs:
+
+```bash
+docker compose stop mongo mongo-init
+docker volume rm lzt2-mongostack_mongo-data
+```
+
 Why single-node?
 
 - enough for local development that needs replica-set features such as transactions/change streams

@@ -2,25 +2,31 @@ name: lzt2-mongostack
 
 services:
   mongo:
-    image: mongo:8.3
+    image: bitnamilegacy/mongodb:8.0
+    platform: ${MONGO_PLATFORM:-linux/amd64}
     container_name: lzt2-mongo
     restart: unless-stopped
+    entrypoint:
+      - bash
+      - -lc
     command:
-      - mongod
-      - --replSet
-      - rs0
-      - --bind_ip_all
-      - --port
-      - "27017"
-      - --wiredTigerCacheSizeGB
-      - "0.5"
+      - |
+        set -euo pipefail
+        mkdir -p /bitnami/mongodb/data/db
+        exec /opt/bitnami/mongodb/bin/mongod \
+          --replSet rs0 \
+          --bind_ip_all \
+          --port 27017 \
+          --wiredTigerCacheSizeGB 0.5 \
+          --dbpath /bitnami/mongodb/data/db
     ports:
       - "27017:27017"
     volumes:
-      - mongo-data:/data/db
+      - mongo-data:/bitnami/mongodb
 
   mongo-init:
-    image: mongo:8.3
+    image: bitnamilegacy/mongodb:8.0
+    platform: ${MONGO_PLATFORM:-linux/amd64}
     container_name: lzt2-mongo-init
     restart: "no"
     depends_on:
@@ -31,10 +37,10 @@ services:
     command:
       - |
         set -euo pipefail
-        until mongosh --host mongo:27017 --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep -q 1; do
+        until /opt/bitnami/mongodb/bin/mongosh --host mongo:27017 --quiet --eval 'db.adminCommand({ ping: 1 }).ok' | grep -q 1; do
           sleep 1
         done
-        mongosh --host mongo:27017 --quiet --eval 'try { rs.status().ok } catch (e) { rs.initiate({_id: "rs0", members: [{ _id: 0, host: "mongo:27017" }] }).ok }'
+        /opt/bitnami/mongodb/bin/mongosh --host mongo:27017 --quiet --eval 'try { rs.status().ok } catch (e) { rs.initiate({_id: "rs0", members: [{ _id: 0, host: "mongo:27017" }] }).ok }'
 
   postgres:
     image: postgres:18
