@@ -1,0 +1,11 @@
+# Keep local environment files out of git
+.env
+*.env
+
+# macOS/editor noise
+.DS_Store
+.idea/
+.vscode/
+
+# Local scratch/logs
+*.log

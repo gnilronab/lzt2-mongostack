@@ -1,0 +1,39 @@
+name: lzt2-mongostack
+
+services:
+  mongo:
+    image: mongo:8.2
+    container_name: lzt2-mongo
+    restart: unless-stopped
+    command:
+      - mongod
+      - --replSet
+      - rs0
+      - --bind_ip_all
+      - --port
+      - "27017"
+      - --wiredTigerCacheSizeGB
+      - "0.5"
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval 'try { rs.status().ok } catch (e) { rs.initiate({_id: \"rs0\", members: [{ _id: 0, host: \"mongo:27017\" }] }).ok }' | grep -q 1"
+        ]
+      interval: 5s
+      timeout: 10s
+      start_period: 10s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+
+volumes:
+  mongo-data:
+  mongo-config:
