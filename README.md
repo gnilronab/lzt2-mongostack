@@ -14,10 +14,40 @@ Why single-node?
 - much lighter and less crash-prone on the Omarchy box than a 3-node test stack
 - persistent named volumes keep the replica-set state stable across restarts
 
+## PostgreSQL 18
+
+The same compose project also starts a completely separate PostgreSQL 18 service. It does not depend on, connect to, or share volumes with MongoDB.
+
+Note: PostgreSQL 18 Docker images expect the persistent volume at `/var/lib/postgresql` rather than the old `/var/lib/postgresql/data` mount style.
+
+Host connection:
+
+```text
+postgresql://lzt2:lzt2-dev-password@localhost:5432/lzt2
+```
+
+Connection from another service in this compose project:
+
+```text
+postgresql://lzt2:lzt2-dev-password@postgres:5432/lzt2
+```
+
 ## Start
 
 ```bash
+docker compose up -d
+```
+
+To start only MongoDB:
+
+```bash
 docker compose up -d mongo
+```
+
+To start only PostgreSQL:
+
+```bash
+docker compose up -d postgres
 ```
 
 ## Verify Mongo
@@ -26,6 +56,12 @@ docker compose up -d mongo
 docker compose ps
 docker compose exec mongo mongosh --quiet --eval 'rs.status().ok'
 docker compose exec mongo mongosh --quiet --eval 'db.hello()'
+```
+
+## Verify PostgreSQL
+
+```bash
+docker compose exec postgres psql -U lzt2 -d lzt2 -c 'select version();'
 ```
 
 Connection URI from the host:

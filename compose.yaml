@@ -34,6 +34,30 @@ services:
         limits:
           memory: 1g
 
+  postgres:
+    image: postgres:18
+    container_name: lzt2-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lzt2
+      POSTGRES_USER: lzt2
+      POSTGRES_PASSWORD: lzt2-dev-password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U lzt2 -d lzt2"]
+      interval: 5s
+      timeout: 5s
+      start_period: 10s
+      retries: 30
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+
 volumes:
   mongo-data:
   mongo-config:
+  postgres-data:
