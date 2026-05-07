@@ -6,6 +6,7 @@ services:
     platform: ${MONGO_PLATFORM:-linux/amd64}
     container_name: lzt2-mongo
     restart: unless-stopped
+    user: "0:0"
     entrypoint:
       - bash
       - -lc
